@@ -1,0 +1,339 @@
+# -*- coding: utf-8 -*-
+"""
+This file is part of NANOLIB
+
+
+NANOLIB was primarily developed at Nanosense by:
+    Shidiq Nur Hidayat (s.hidayat@nanosense-id.com)
+
+Created on Tue Jul 14 18:23:51 2020
+
+@author: Shidiq Nur Hidayat
+"""
+
+import matplotlib
+import numpy as np
+import itertools
+import matplotlib.pyplot as plt
+import os
+
+
+def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28, tick_size=20, legend_size=18):
+    params = {'font.family': 'sans-serif',
+              'font.sans-serif': 'Arial',
+              'xtick.labelsize': tick_size,
+              'ytick.labelsize': tick_size,
+              'axes.labelsize': axes_size,
+              'figure.figsize': figsize,
+              'legend.loc': 'best',
+              'legend.fontsize': legend_size,
+              'legend.fancybox': False}
+    matplotlib.rcParams.update(params)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    fig.subplots_adjust(left=adj_left, bottom=adj_bottom, right=.97, top=.97)
+    return fig, ax
+
+
+def train_test_split(X, y, test_size=0.2, random_state=99):
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=test_size,
+                                                        random_state=random_state)
+    return X_train, X_test, y_train, y_test
+
+
+class TooMuchUnique(ValueError):
+    pass
+
+
+def saveimg(fig, file='foo', dpi=600, filetype="pdf"):
+    path_ = os.path.dirname(file)
+    if not os.path.exists(path_):
+        os.makedirs(path_)
+
+    if isinstance(filetype, str):
+        fig.savefig(f"{file}.{filetype}", dpi=dpi)
+    elif isinstance(filetype, list):
+        for i in filetype:
+            fig.savefig(f"{file}.{filetype[i]}", dpi=dpi)
+
+
+def plotroc(Y_test, Y_score, lw=3, colors=None, multiclass=True):
+    if colors is None:
+        colors = ['aqua', 'darkorange', 'cornflowerblue']
+
+    from sklearn.metrics import roc_curve, auc
+    from scipy import interp
+
+    if multiclass:
+        n_classes = Y_test.shape[1]
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(Y_test[:, i], Y_score[:, i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+        fpr["micro"], tpr["micro"], _ = roc_curve(Y_test.ravel(), Y_score.ravel())
+        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+        mean_tpr = np.zeros_like(all_fpr)
+        for i in range(n_classes):
+            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+        mean_tpr /= n_classes
+        fpr["macro"] = all_fpr
+        tpr["macro"] = mean_tpr
+        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+        fig, ax = customplot()
+        ax = plt.plot(fpr["micro"], tpr["micro"],
+                      label='micro-average ROC curve (area = {0:0.2f})'
+                            ''.format(roc_auc["micro"]),
+                      color='deeppink', linestyle=':', linewidth=4)
+
+        ax = plt.plot(fpr["macro"], tpr["macro"],
+                      label='macro-average ROC curve (area = {0:0.2f})'
+                            ''.format(roc_auc["macro"]),
+                      color='navy', linestyle=':', linewidth=4)
+
+        colors = itertools.cycle(colors)
+        for i, color in zip(range(n_classes), colors):
+            ax = plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+                          label='ROC curve of class {0} (area = {1:0.2f})'
+                                ''.format(i, roc_auc[i]))
+
+        ax = plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+        ax = plt.xlim([-0.05, 1.0])
+        ax = plt.ylim([0.0, 1.05])
+        ax = plt.xlabel('False Positive Rate')
+        ax = plt.ylabel('True Positive Rate')
+        ax = plt.legend(loc="lower right")
+    else:
+        # fpr, tpr, _ = roc_curve(Y_test, Y_score[:, 1])
+        fpr, tpr, _ = roc_curve(Y_test, Y_score)
+        roc_auc = auc(fpr, tpr)
+
+        fig, ax = customplot()
+        ax = plt.plot(fpr, tpr, color='darkorange', lw=lw,
+                      label='ROC curve (area = %0.2f)' % roc_auc)
+        ax = plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+        ax = plt.xlim([-0.05, 1.0])
+        ax = plt.ylim([0.0, 1.05])
+        ax = plt.xlabel('False Positive Rate')
+        ax = plt.ylabel('True Positive Rate')
+        ax = plt.legend(loc='lower right')
+
+    return fig, (fpr, tpr, roc_auc)
+
+
+# noinspection PyUnresolvedReferences
+def plot_confusion_matrix(cm_, classes, cmap=plt.cm.RdPu, fontsize=26, xrot=0, yrot=0):
+    plt.imshow(cm_, interpolation='nearest', cmap=cmap, aspect='equal')
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=xrot)
+    plt.yticks(tick_marks, classes, rotation=yrot)
+
+    fmt = 'd'
+    thresh = cm_.max() / 2.
+    for i, j in itertools.product(range(cm_.shape[0]), range(cm_.shape[1])):
+        plt.text(j, i, format(cm_[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm_[i, j] > thresh else "black",
+                 fontsize=fontsize,
+                 )
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+
+
+def runKFoldCV(estimator, X, y, scaling=None, cv=None, random_state=99):
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.model_selection import RepeatedKFold
+
+    if scaling is None:
+        scaling = StandardScaler()
+
+    if cv is None:
+        cv = RepeatedKFold(n_splits=10, n_repeats=10, random_state=random_state)
+
+    score = list()
+    for train, test in cv.split(X):
+        X_train = scaling.fit_transform(X[train])
+        X_test = scaling.transform(X[test])
+        y_train = y[train]
+        y_test = y[test]
+        estimator.fit(X_train, y_train)
+        score.append(estimator.score(X_test, y_test))
+
+    print("Baseline: %.2f%% (%.2f%%)" % (np.mean(score) * 100, np.std(score) / np.sqrt(len(score)) * 100))
+
+    return estimator, score
+
+
+def readini(file, section, key):
+    from configparser import ConfigParser
+    config = ConfigParser()
+    config.read(file)
+    return config.get(section, key)
+
+
+def writeini(file, section, key, string):
+    from configparser import ConfigParser
+    config = ConfigParser()
+    config.read(file)
+    config[section][key] = string
+
+    with open(file, 'w') as configfile:
+        config.write(configfile)
+
+
+def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█'):
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='\r')
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+
+
+def sample(x, n=None, random_state=None):
+    from random import sample
+    from random import seed
+
+    if not isinstance(x, list):
+        items = [x for x in range(x)]
+    else:
+        items = x
+
+    if n is None or n > len(items):
+        n = len(items)
+
+    seed(random_state)
+    return sample(items, n)
+
+
+def match(a, b):
+    return [b.index(x) + 1 if x in b else None for x in a]
+
+
+def url(foldername='run'):
+    import os
+    get_folder = os.path.join(os.curdir, foldername)
+    os.makedirs(get_folder, exist_ok=True)
+    return get_folder
+
+
+def ClassificationReport(ytrue, ypred, plotcm=False, file=None, **options):
+    from sklearn.metrics import classification_report, cohen_kappa_score, matthews_corrcoef, confusion_matrix
+
+    a = options.get('adj_left', 0.1)
+    b = options.get('adj_bottom', 0.2)
+    figsize = options.get('figsize', [4, 4])
+    axes_size = options.get('axes_size', 22)
+    cmap = options.get('cmap', plt.cm.RdPu)
+    fontsize = options.get('fontsize', 26)
+    xrot = options.get('xrot', 0)
+    show = options.get('show', True)
+
+    acc = cohen_kappa_score(ytrue, ypred)
+    cm = confusion_matrix(ytrue, ypred)
+    matt = matthews_corrcoef(ytrue, ypred)
+    cr = classification_report(ytrue, ypred)
+
+    print(f'\nConfusion matrix:\n{cm}')
+    print(f'\nCohen kappa score        : {np.round(acc, 3)}')
+    print(f'Matthews correlation coef: {np.round(matt, 3)}\n')
+    print(cr)
+
+    if file is not None:
+        from pycm import ConfusionMatrix
+
+        path_ = os.path.dirname(file)
+        if not os.path.exists(path_):
+            os.makedirs(path_)
+
+        CM = ConfusionMatrix(ytrue, ypred)
+        CM.save_html(file)
+
+    if plotcm:
+        fig, _ = customplot(adj_bottom=b, adj_left=a, figsize=figsize,
+                            axes_size=axes_size)
+        plot_confusion_matrix(cm, classes=np.unique(ytrue), cmap=cmap,
+                              fontsize=fontsize, xrot=xrot)
+        if show:
+            plt.show()
+        return fig
+
+
+def FullClassificationReport(model, xtrain, xtest, ytrain, ytest, bypass=False, scoring=None, **options):
+    import pandas as pd
+
+    a = options.get('adj_left', 0.1)
+    b = options.get('adj_bottom', 0.2)
+    figsize = options.get('figsize', [4, 4])
+    axes_size = options.get('axes_size', 22)
+    cmap = options.get('cmap', plt.cm.RdPu)
+    fontsize = options.get('fontsize', 26)
+    xrot = options.get('xrot', 0)
+    cmreport = options.get('cmreport', None)
+    savefigs = options.get('savefigs', None)
+    filetype = options.get('filetype', "pdf")
+    dpi = options.get('dpi', 600)
+
+    print('Training Report')
+    if bypass:
+        ptrain = xtrain
+    else:
+        ptrain = model.predict(xtrain)
+
+    fig1 = ClassificationReport(ytrain, ptrain, plotcm=True, show=True,
+                                adj_left=a, adj_bottom=b, figsize=figsize, axes_size=axes_size,
+                                cmap=cmap, fontsize=fontsize, xrot=xrot, file=f'{cmreport}_training')
+    print(f'{cmreport}_training')
+
+    print('Testing Report')
+    if bypass:
+        ptest = xtest
+    else:
+        ptest = model.predict(xtest)
+    fig2 = ClassificationReport(ytest, ptest, plotcm=True, show=True,
+                                adj_left=a, adj_bottom=b, figsize=figsize, axes_size=axes_size,
+                                cmap=cmap, fontsize=fontsize, xrot=xrot, file=f'{cmreport}_testing')
+
+    print('All Report')
+    x = np.concatenate((xtrain, xtest))
+    y = np.concatenate((ytrain, ytest))
+    if bypass:
+        p = x
+    else:
+        p = model.predict(x)
+    fig3 = ClassificationReport(y, p, plotcm=True, show=True,
+                                adj_left=a, adj_bottom=b, figsize=figsize, axes_size=axes_size,
+                                cmap=cmap, fontsize=fontsize, xrot=xrot, file=f'{cmreport}_all')
+
+    if scoring is None:
+        from sklearn.metrics import accuracy_score
+        scoring = accuracy_score
+
+    a = scoring(ytrain, ptrain)
+    b = scoring(ytest, ptest)
+    c = scoring(y, p)
+    df = pd.DataFrame({'Data': ['Train', 'Test', 'All'], 'Value': [a, b, c]})
+    fig4, ax = customplot()
+    ax.bar(df['Data'].values, df['Value'].values)
+    ax.set_ylim(np.min(df['Value'].values) - 0.1, 1.0)
+
+    if savefigs is not None:
+        saveimg(fig1, file=f'{savefigs}_training', filetype=filetype, dpi=dpi)
+        saveimg(fig2, file=f'{savefigs}_testing', filetype=filetype, dpi=dpi)
+        saveimg(fig3, file=f'{savefigs}_all', filetype=filetype, dpi=dpi)
+        saveimg(fig4, file=f'{savefigs}_barplot', filetype=filetype, dpi=dpi)
+
+    return fig1, fig2, fig3, fig4
+
+
+def timenow():
+    import time
+    return time.asctime(time.localtime(time.time()))
