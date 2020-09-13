@@ -1,9 +1,11 @@
 
-# TORCLIB
+# NANOLIB
 
-Taste Odor Research Center Library
+## NANOSENSE ANALYTICAL SOFTWARE Library
 
 Quick Data Analysis for Phython
+
+
 
 > pip install git+https://github.com/Shidiq/nanolib.git
 
