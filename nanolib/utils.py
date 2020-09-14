@@ -18,7 +18,8 @@ import matplotlib.pyplot as plt
 import os
 
 
-def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28, tick_size=20, legend_size=18):
+def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28, tick_size=20, legend_size=18,
+               co=False):
     params = {'font.family': 'sans-serif',
               'font.sans-serif': 'Arial',
               'xtick.labelsize': tick_size,
@@ -32,7 +33,13 @@ def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28,
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     fig.subplots_adjust(left=adj_left, bottom=adj_bottom, right=.97, top=.97)
-    return fig, ax
+    if co:
+        co = open('configs/list_co.txt', 'r')
+        co = co.readlines()
+        co = [f'#{co[i].strip().replace(" ", "")}' for i in range(len(co))]
+        return fig, ax, co
+    else:
+        return fig, ax
 
 
 def train_test_split(X, y, test_size=0.2, random_state=99):
