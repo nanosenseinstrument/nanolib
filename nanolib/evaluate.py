@@ -20,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import make_scorer, f1_score
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.metrics import confusion_matrix
-from torclib.utils import customplot
+from nanolib.utils import customplot
 from pycm import ConfusionMatrix
 
 
@@ -55,7 +55,7 @@ class CalcROC:
 
     def fit(self, *arrays):
         from sklearn.multiclass import OneVsRestClassifier
-        from torclib.utils import plotroc
+        from nanolib.utils import plotroc
 
         self.X_train = arrays[0]
         self.X_test = arrays[1]
@@ -140,7 +140,7 @@ class Train:
 
     def fit(self, *arrays):
         from sklearn.pipeline import Pipeline
-        from torclib.utils import plotroc
+        from nanolib.utils import plotroc
         
         if len(arrays) == 2:
             self.X_train = arrays[0]
@@ -347,7 +347,7 @@ class Train:
                 self.CM.save_html(f'{str(file)}-{info}')
 
     def plotcm(self, external=False, intercv=False, **options):
-        from torclib.utils import plot_confusion_matrix
+        from nanolib.utils import plot_confusion_matrix
         
         a = options.get('adj_left', 0.1)
         b = options.get('adj_bottom', 0.2)

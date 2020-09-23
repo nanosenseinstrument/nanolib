@@ -18,7 +18,7 @@ import warnings
 import matplotlib
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from torclib.utils import customplot, train_test_split
+from nanolib.utils import customplot, train_test_split
 
 
 class Stats:

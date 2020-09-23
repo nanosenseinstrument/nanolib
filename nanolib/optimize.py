@@ -16,7 +16,7 @@ import random
 import pandas as pd
 import matplotlib.pyplot as plt
 import warnings
-from torclib.utils import customplot, printProgressBar
+from nanolib.utils import customplot, printProgressBar
 
 
 class TuneSVM:
@@ -378,7 +378,7 @@ class anneal:
 
     @staticmethod
     def SAstep(curr_set, maxvar, k=None, size_dev=1, limit=2, random_state=None):
-        from torclib.utils import sample, match
+        from nanolib.utils import sample, match
 
         def lessvar():
             warnings.warn('k < 2, k set to 2', stacklevel=2)

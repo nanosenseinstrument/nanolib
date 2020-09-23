@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from torclib.utils import TooMuchUnique, customplot
+from nanolib.utils import TooMuchUnique, customplot
 
 
 class CalcPCA:
