@@ -347,7 +347,7 @@ def timenow():
 
 
 # noinspection PyPep8Naming
-def logging(logPath, fileName):
+def Logging(logPath, fileName):
     """
     logging function
     :param logPath:
