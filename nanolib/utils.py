@@ -344,3 +344,27 @@ def FullClassificationReport(model, xtrain, xtest, ytrain, ytest, bypass=False, 
 def timenow():
     import time
     return time.asctime(time.localtime(time.time()))
+
+
+# noinspection PyPep8Naming
+def logging(logPath, fileName):
+    """
+    logging function
+    :param logPath:
+    :param fileName:
+    :return:
+    """
+    import logging
+
+    logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+    rootLogger = logging.getLogger()
+
+    fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
+    fileHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(fileHandler)
+
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(consoleHandler)
+
+    return rootLogger

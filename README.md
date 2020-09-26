@@ -71,3 +71,7 @@ Data visualize
 ### version 0.0.1 (September 13, 2020)
 
 - initial Release
+
+### version 0.0.4 (September 26, 2020)
+
+- add utils logger
