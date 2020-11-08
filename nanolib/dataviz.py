@@ -134,8 +134,15 @@ class CalcPCA:
     def screenplot(self, **options):
         a = options.get('adj_left', 0.1)
         b = options.get('adj_bottom', 0.2)
+        lim = options.get('PC', None)
+
+        if lim is None:
+            data_ = self.vardf
+        else:
+            data_ = self.vardf.loc[:lim, :]
+
         fig, _ = customplot(adj_bottom=b, adj_left=a)
-        plt.bar(x='PC', height='Var (%)', data=self.vardf)
+        plt.bar(x='PC', height='Var (%)', data=data_)
         plt.xticks(rotation='vertical')
         plt.xlabel('Principal Component')
         plt.ylabel('Percentage of Variance')

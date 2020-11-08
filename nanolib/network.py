@@ -12,7 +12,7 @@ Created on Tue Jul 14 18:23:51 2020
 """
 
 import pandas as pd
-import io
+# import io
 from contextlib import redirect_stdout
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
@@ -51,8 +51,8 @@ class DNNLogger:
     Methods:
         - fit(xtrain, xtest, ytrain, ytest)
     """
-    
-    def __init__(self, nfeature = 2, nclasses = 2, **options):
+
+    def __init__(self, nfeature=2, nclasses=2, **options):
         self.xtrain = None
         self.xtest = None
         self.ytrain = None
@@ -63,7 +63,7 @@ class DNNLogger:
         self.hidden = options.get('hidden', [500, 1000])
         self.activation = options.get('activation', ['relu', 'relu'])
         self.dropout = options.get('dropout', 0.2)
-        self.l2  = options.get('l2', None)
+        self.l2 = options.get('l2', None)
         self.niter = options.get('iteration', 1)
         self.epochs = options.get('epochs', 100)
         self.batchsize = options.get('batch_size', 5)
@@ -77,7 +77,7 @@ class DNNLogger:
         self.lastactivation = options.get('lastactivation', 'softmax')
         self.loss = options.get('loss', 'sparse_categorical_crossentropy')
         self.config()
-    
+
     def config(self):
         os.makedirs(self.logdir, exist_ok=True)
         neuronx = [f'hidden{i}' for i in range(len(self.hidden))]
@@ -99,11 +99,11 @@ class DNNLogger:
         self.info['logdir'] = self.logdir
         self.info['input_space'] = self.nfeature
         self.info['output_space'] = self.nclasses
-        
+
         if len(self.hidden) != len(self.activation):
             raise Exception('number of hidden not same as number of activation')
-        
-    def createDNN(self):
+
+    def createnetwork(self):
         model = tf.keras.models.Sequential()
         model.add(tf.keras.layers.Dense(self.hidden[0], activation=self.activation[0], input_shape=(self.nfeature,)))
         model.add(tf.keras.layers.Dropout(self.dropout))
@@ -111,84 +111,84 @@ class DNNLogger:
             if self.l2 is None:
                 model.add(tf.keras.layers.Dense(self.hidden[i + 1], activation=self.activation[i + 1]))
             else:
-                model.add(tf.keras.layers.Dense(self.hidden[i + 1], activation=self.activation[i + 1], kernel_regularizer=tf.keras.regularizers.l2(self.l2)))
+                model.add(tf.keras.layers.Dense(self.hidden[i + 1], activation=self.activation[i + 1],
+                                                kernel_regularizer=tf.keras.regularizers.l2(self.l2)))
             model.add(tf.keras.layers.Dropout(self.dropout))
         model.add(tf.keras.layers.Dense(self.nclasses, activation=self.lastactivation))
-        
+
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=self.metrics)
         return model
-    
+
     def fit(self, *arrays):
         self.xtrain = arrays[0]
         self.xtest = arrays[1]
         self.ytrain = arrays[2]
         self.ytest = arrays[3]
-        
+
         if self.scaler is not None:
             scaler = self.scaler()
             self.xtrain = scaler.fit_transform(self.xtrain)
             self.xtest = scaler.transform(self.xtest)
-        
-        lossTrain = []
-        lossTest = []
-        accTrain = []
-        accTest = []
-        listID = []
+
+        loss_train = []
+        loss_test = []
+        acc_train = []
+        acc_test = []
+        list_id = []
         get_run_logdir = []
-        f = io.StringIO()
-        
+        # f = io.StringIO()
+
         for i in range(self.niter):
             print(i)
 
             run_id = time.strftime("run_%Y_%m_%d-%H_%M_%S")
             get_run_logdir = os.path.join(self.logdir, run_id)
-        
-            logcsv = tf.keras.callbacks.CSVLogger(f'{get_run_logdir}.csv', append=True, separator=',')
+
+            logcsv = tf.keras.callbacks.CSVLogger(f'{get_run_logdir}.csv', append=True)
             early_stopper = tf.keras.callbacks.EarlyStopping(patience=5)
-        
-            model = self.createDNN()
+
+            model = self.createnetwork()
 
             if self.validationdata is False:
                 if self.validationsize is None:
-                    model.fit(self.xtrain, self.ytrain, epochs=self.epochs, 
-                            batch_size=self.batchsize, verbose=self.verbose,
-                            callbacks=[logcsv, early_stopper])
+                    model.fit(self.xtrain, self.ytrain, epochs=self.epochs,
+                              batch_size=self.batchsize, verbose=self.verbose,
+                              callbacks=[logcsv, early_stopper])
                 else:
-                    model.fit(self.xtrain, self.ytrain, epochs=self.epochs, 
-                            batch_size=self.batchsize, verbose=self.verbose, 
-                            validation_split=self.validationsize,
-                            callbacks=[logcsv, early_stopper])
+                    model.fit(self.xtrain, self.ytrain, epochs=self.epochs,
+                              batch_size=self.batchsize, verbose=self.verbose,
+                              validation_split=self.validationsize,
+                              callbacks=[logcsv, early_stopper])
             else:
-                model.fit(self.xtrain, self.ytrain, epochs=self.epochs, 
-                        batch_size=self.batchsize, verbose=self.verbose,
-                        validation_data=(self.xtest, self.ytest),
-                        callbacks=[logcsv, early_stopper])
-            
+                model.fit(self.xtrain, self.ytrain, epochs=self.epochs,
+                          batch_size=self.batchsize, verbose=self.verbose,
+                          validation_data=(self.xtest, self.ytest),
+                          callbacks=[logcsv, early_stopper])
+
             with open(f'{get_run_logdir}.txt', 'w') as f:
                 with redirect_stdout(f):
-                    resTrain = model.evaluate(self.xtrain, self.ytrain, verbose=2)
-                    resTest = model.evaluate(self.xtest, self.ytest, verbose=2)
-                    print(resTrain)
-                    print(resTest)
-        
-            lossTrain.append(resTrain[0])
-            accTrain.append(resTrain[1])
-            lossTest.append(resTest[0])
-            accTest.append(resTest[1])
-            listID.append(run_id)
-        
+                    results_train = model.evaluate(self.xtrain, self.ytrain, verbose=2)
+                    results_test = model.evaluate(self.xtest, self.ytest, verbose=2)
+                    print(results_train)
+                    print(results_test)
+
+            loss_train.append(results_train[0])
+            acc_train.append(results_train[1])
+            loss_test.append(results_test[0])
+            acc_test.append(results_test[1])
+            list_id.append(run_id)
+
             model.save(f'{get_run_logdir}.h5')
-        
+
         res = {
-            'ID': listID,
-            'loss Train': lossTrain,
-            'acc Train': accTrain,
-            'loss Test': lossTest,
-            'acc Test': accTest,}
-        
+            'ID': list_id,
+            'loss Train': loss_train,
+            'acc Train': acc_train,
+            'loss Test': loss_test,
+            'acc Test': acc_test, }
+
         res = pd.DataFrame(data=res)
         res.to_csv(f'{get_run_logdir}_SUMMARY.csv')
         w = csv.writer(open(f'{get_run_logdir}_config.csv', 'w'))
         for key, val in self.info.items():
             w.writerow([key, val])
-                        
