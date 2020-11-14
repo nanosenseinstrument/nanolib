@@ -8,7 +8,7 @@ Created on Tue Jul 14 18:32:47 2020
 from setuptools import setup
 
 setup(name='nanolib',
-      version='0.0.6',
+      version='0.0.7',
       description='The Data Science Assistant from NANOSENSE',
       url='https://github.com/Shidiq/nanolib.git',
       author='Shidiq Nur Hidayat',

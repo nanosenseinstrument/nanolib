@@ -192,7 +192,7 @@ class Stats:
         print(self.df[self.key].unique())
         return self.X, y
 
-    def signalmean(self, rot=90, adj_left=0.14, adj_bottom=0.24, scale=False):
+    def signalmean(self, rot=90, adj_left=0.14, adj_bottom=0.24, scale=False, median=False):
         label = self.df[self.key].unique()
         nama = list(self.df)[0:self.feature]
         mean_df = pd.DataFrame()
@@ -203,9 +203,15 @@ class Stats:
             ind = self.df[self.key].isin([item])
             temp = self.df[ind]
             temp = temp[nama]
+            
             if scale:
                 temp[nama] = scaling.transform(temp[nama])
-            temp = temp.apply(np.mean, axis=0)
+
+            if median:
+                temp = temp.apply(np.median, axis=0)
+            else:
+                temp = temp.apply(np.mean, axis=0)
+
             temp = pd.DataFrame(data=temp, columns=[item]).transpose()
             mean_df = mean_df.append(temp)
 
