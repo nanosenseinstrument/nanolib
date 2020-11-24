@@ -108,7 +108,7 @@ class Windowing:
     mode = 'norm' (default), 'diff' or 'frac'
     """
 
-    def __init__(self, n=3, ts=10, tdelay=10, tsampling=40, fun=None, mode='norm', envi=0):
+    def __init__(self, n=3, ts=10, tdelay=10, tsampling=40, fun=None, mode='norm', envi=0, nsensor=10):
         self.n = n
         self.ts = ts
         self.fun = fun
@@ -117,6 +117,7 @@ class Windowing:
         self.mode = mode
         self.storage = pd.DataFrame()
         self.envi = envi
+        self.nsensor = nsensor
 
     def func(self, y):
         t = len(y) - self.tdelay
@@ -153,10 +154,10 @@ class Windowing:
         for item in rawdata:
             data = pd.read_csv(os.path.join(logdir, item))
 
-            data_temp = data[list(data)[11]].loc[self.tdelay: (self.tdelay + self.tsampling)]
-            data_humid = data[list(data)[12]].loc[self.tdelay: (self.tdelay + self.tsampling)]
+            data_temp = data[list(data)[self.nsensor + 1]].loc[self.tdelay: (self.tdelay + self.tsampling)]
+            data_humid = data[list(data)[self.nsensor + 2]].loc[self.tdelay: (self.tdelay + self.tsampling)]
 
-            data = data[list(data)[1:11]]
+            data = data[list(data)[1:(self.nsensor + 1)]]
             data = data.loc[:((self.tdelay + self.tsampling) - 1), :]
 
             res = [self.func(data[i].values) for i in list(data)]
@@ -182,10 +183,10 @@ class Windowing:
         data = DataFrame
         :return values
         """
-        data_temp = data[list(data)[11]].loc[self.tdelay: (self.tdelay + self.tsampling)]
-        data_humid = data[list(data)[12]].loc[self.tdelay: (self.tdelay + self.tsampling)]
+        data_temp = data[list(data)[self.nsensor + 1]].loc[self.tdelay: (self.tdelay + self.tsampling)]
+        data_humid = data[list(data)[self.nsensor + 2]].loc[self.tdelay: (self.tdelay + self.tsampling)]
 
-        data = data[list(data)[1:11]]
+        data = data[list(data)[1:(self.nsensor + 1)]]
         data = data.loc[:((self.tdelay + self.tsampling) - 1), :]
 
         res = [self.func(data[i].values) for i in list(data)]
@@ -200,16 +201,3 @@ class Windowing:
         res = pd.DataFrame(res).transpose()
 
         return res.values
-
-
-def grad(y):
-    x = np.arange(0, len(y)/10, 0.1)
-    try:
-        p = np.polyfit(x, y, 2)
-        a = p[0] * 2
-        if round(a, 1) == 0.0:
-            a = p[1]
-    except :
-        p = np.polyfit(x, y, 1)
-        a = p[0]
-    return a
