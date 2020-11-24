@@ -75,3 +75,7 @@ Data visualize
 ### version 0.0.4 (September 26, 2020)
 
 - add utils logger
+
+### version 0.0.8 (November 24, 2020)
+
+- add genoselib
