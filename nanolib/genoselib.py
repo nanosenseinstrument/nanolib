@@ -7,16 +7,20 @@ import os
 
 
 class DataExtract:
-    def __init__(self, fun, limit, baseline=0, nsensor=10, mode='diff'):
+    def __init__(self, fun, limit, baseline=0, nsensor=10, mode='diff', envi=0):
         self.fun = fun  # [np.max, np.mean, np.std, np.trapz]
         self.limit = limit  # [100, 500]
         self.baseline = baseline
         self.nsensor = nsensor
         self.mode = mode
+        self.envi = envi
 
     def transform(self, data):
         data = data.drop(list(data)[0], axis=1)
         selected = np.arange(self.limit[0], self.limit[1])
+
+        data_temp = data[list(data)[self.nsensor]].loc[self.limit[0]: self.limit[1]]
+        data_humid = data[list(data)[self.nsensor + 1]].loc[self.limit[0]: self.limit[1]]
 
         storage = pd.DataFrame()
         for i, fun in enumerate(self.fun):
@@ -39,6 +43,14 @@ class DataExtract:
 
             names = [f'F{i}{x + 1}' for x in range(self.nsensor)]
             temp = data.apply(fe)[:self.nsensor]
+
+            if self.envi == 1:
+                temp = temp.append(pd.Series([data_temp.median(), data_humid.median()]), ignore_index=True)
+                names = names + ['Temp', 'Humid']
+            elif self.envi == 2:
+                temp = temp.append(pd.Series([data_temp.median(), data_temp.std(), data_humid.median(), data_humid.std()]), ignore_index=True)
+                names = names + ['Temp', 'dTemp', 'Humid', 'dHumid']
+            
             temp = pd.DataFrame(temp).transpose()
             temp.columns = names
 
