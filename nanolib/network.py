@@ -305,19 +305,18 @@ class BINDNNLogger:
             self.xtrain = scaler.fit_transform(self.xtrain)
             self.xtest = scaler.transform(self.xtest)
 
-        loss_train = []
-        acc_train = []
-        f1_train = []
-        precision_train = []
-        recall_train = []
-        loss_test = []
-        acc_test = []
-        f1_test = []
-        precision_test = []
-        recall_test = []
+        list_loss_train = []
+        list_acc_train = []
+        list_f1_train = []
+        list_precision_train = []
+        list_recall_train = []
+        list_loss_test = []
+        list_acc_test = []
+        list_f1_test = []
+        list_precision_test = []
+        list_recall_test = []
         list_id = []
         get_run_logdir = []
-        # f = io.StringIO()
 
         for i in range(self.niter):
             print(i)
@@ -356,32 +355,32 @@ class BINDNNLogger:
                     print(accuracy_train)
                     print(accuracy_test)
 
-            loss_train.append(loss_train)
-            acc_train.append(accuracy_train)
-            f1_train.append(f1_score_train)
-            precision_train.append(precision_train)
-            recall_train.append(recall_train)
-            loss_test.append(loss_test)
-            acc_test.append(accuracy_test)
-            f1_test.append(f1_score_test)
-            precision_test.append(precision_test)
-            recall_test.append(recall_test)
+            list_loss_train.append(loss_train)
+            list_acc_train.append(accuracy_train)
+            list_f1_train.append(f1_score_train)
+            list_precision_train.append(precision_train)
+            list_recall_train.append(recall_train)
+            list_loss_test.append(loss_test)
+            list_acc_test.append(accuracy_test)
+            list_f1_test.append(f1_score_test)
+            list_precision_test.append(precision_test)
+            list_recall_test.append(recall_test)
             list_id.append(run_id)
 
             model.save(f'{get_run_logdir}.h5')
 
         res = {
             'ID': list_id,
-            'loss Train': loss_train,
-            'acc Train': acc_train,
-            'f1 Train': f1_train,
-            'precision Train': precision_train,
-            'recall Train': recall_train,
-            'loss Test': loss_test,
-            'acc Test': acc_test,
-            'f1 Test': f1_test,
-            'precision Test': precision_test,
-            'recall Test': recall_test,
+            'loss Train': list_loss_train,
+            'acc Train': list_acc_train,
+            'f1 Train': list_f1_train,
+            'precision Train': list_precision_train,
+            'recall Train': list_recall_train,
+            'loss Test': list_loss_test,
+            'acc Test': list_acc_test,
+            'f1 Test': list_f1_test,
+            'precision Test': list_precision_test,
+            'recall Test': list_recall_test,
         }
 
         res = pd.DataFrame(data=res)
