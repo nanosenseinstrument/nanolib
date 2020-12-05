@@ -18,10 +18,11 @@ import matplotlib.pyplot as plt
 import os
 
 
-def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28, tick_size=20, legend_size=18,
+# noinspection PyDefaultArgument
+def customplot(adj_left=.13, adj_bottom=.13, figsize=[10.72, 8.205], axes_size=31, tick_size=24, legend_size=24,
                co=False):
     params = {'font.family': 'sans-serif',
-              'font.sans-serif': 'Arial',
+              'font.sans-serif': 'Verdana',
               'xtick.labelsize': tick_size,
               'ytick.labelsize': tick_size,
               'axes.labelsize': axes_size,
@@ -32,7 +33,7 @@ def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28,
     matplotlib.rcParams.update(params)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    fig.subplots_adjust(left=adj_left, bottom=adj_bottom, right=.97, top=.97)
+    fig.subplots_adjust(left=adj_left, bottom=adj_bottom, right=.95, top=.94)
     if co:
         co = open('configs/list_co.txt', 'r')
         co = co.readlines()
@@ -42,11 +43,11 @@ def customplot(adj_left=.1, adj_bottom=.1, figsize=[10.72, 8.205], axes_size=28,
         return fig, ax
 
 
-def train_test_split(X, y, test_size=0.2, random_state=99):
+def train_test_split(x, y, test_size=0.2, random_state=99):
     from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=test_size,
+    x_train, x_test, y_train, y_test = train_test_split(x, y, stratify=y, test_size=test_size,
                                                         random_state=random_state)
-    return X_train, X_test, y_train, y_test
+    return x_train, x_test, y_train, y_test
 
 
 class TooMuchUnique(ValueError):
@@ -65,7 +66,8 @@ def saveimg(fig, file='foo', dpi=600, filetype="pdf"):
             fig.savefig(f"{file}.{filetype[i]}", dpi=dpi)
 
 
-def plotroc(Y_test, Y_score, lw=3, colors=None, multiclass=True):
+# noinspection PyUnusedLocal
+def plotroc(y_test, y_score, lw=3, colors=None, multiclass=True):
     if colors is None:
         colors = ['aqua', 'darkorange', 'cornflowerblue']
 
@@ -73,15 +75,15 @@ def plotroc(Y_test, Y_score, lw=3, colors=None, multiclass=True):
     from scipy import interp
 
     if multiclass:
-        n_classes = Y_test.shape[1]
+        n_classes = y_test.shape[1]
         fpr = dict()
         tpr = dict()
         roc_auc = dict()
         for i in range(n_classes):
-            fpr[i], tpr[i], _ = roc_curve(Y_test[:, i], Y_score[:, i])
+            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
             roc_auc[i] = auc(fpr[i], tpr[i])
 
-        fpr["micro"], tpr["micro"], _ = roc_curve(Y_test.ravel(), Y_score.ravel())
+        fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
         roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
         all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
@@ -116,8 +118,8 @@ def plotroc(Y_test, Y_score, lw=3, colors=None, multiclass=True):
         ax = plt.ylabel('True Positive Rate')
         ax = plt.legend(loc="lower right")
     else:
-        # fpr, tpr, _ = roc_curve(Y_test, Y_score[:, 1])
-        fpr, tpr, _ = roc_curve(Y_test, Y_score)
+        # fpr, tpr, _ = roc_curve(y_test, y_score[:, 1])
+        fpr, tpr, _ = roc_curve(y_test, y_score)
         roc_auc = auc(fpr, tpr)
 
         fig, ax = customplot()
@@ -154,7 +156,7 @@ def plot_confusion_matrix(cm_, classes, cmap=plt.cm.RdPu, fontsize=26, xrot=0, y
     plt.tight_layout()
 
 
-def runKFoldCV(estimator, X, y, scaling=None, cv=None, random_state=99):
+def runkfoldcv(estimator, x, y, scaling=None, cv=None, random_state=99):
     from sklearn.preprocessing import StandardScaler
     from sklearn.model_selection import RepeatedKFold
 
@@ -165,13 +167,13 @@ def runKFoldCV(estimator, X, y, scaling=None, cv=None, random_state=99):
         cv = RepeatedKFold(n_splits=10, n_repeats=10, random_state=random_state)
 
     score = list()
-    for train, test in cv.split(X):
-        X_train = scaling.fit_transform(X[train])
-        X_test = scaling.transform(X[test])
+    for train, test in cv.split(x):
+        x_train = scaling.fit_transform(x[train])
+        x_test = scaling.transform(x[test])
         y_train = y[train]
         y_test = y[test]
-        estimator.fit(X_train, y_train)
-        score.append(estimator.score(X_test, y_test))
+        estimator.fit(x_train, y_train)
+        score.append(estimator.score(x_test, y_test))
 
     print("Baseline: %.2f%% (%.2f%%)" % (np.mean(score) * 100, np.std(score) / np.sqrt(len(score)) * 100))
 
@@ -195,10 +197,10 @@ def writeini(file, section, key, string):
         config.write(configfile)
 
 
-def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█'):
+def printprogressbar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█'):
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
+    filled_length = int(length * iteration // total)
+    bar = fill * filled_length + '-' * (length - filled_length)
     print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='\r')
     # Print New Line on Complete
     if iteration == total:
@@ -232,6 +234,7 @@ def url(foldername='run'):
     return get_folder
 
 
+# noinspection PyPep8Naming
 def ClassificationReport(ytrue, ypred, plotcm=False, file=None, **options):
     from sklearn.metrics import classification_report, cohen_kappa_score, matthews_corrcoef, confusion_matrix
 
@@ -274,6 +277,7 @@ def ClassificationReport(ytrue, ypred, plotcm=False, file=None, **options):
         return fig
 
 
+# noinspection PyPep8Naming
 def FullClassificationReport(model, xtrain, xtest, ytrain, ytest, bypass=False, scoring=None, **options):
     import pandas as pd
 
