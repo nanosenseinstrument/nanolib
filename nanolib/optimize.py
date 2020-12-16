@@ -16,7 +16,7 @@ import random
 import pandas as pd
 import matplotlib.pyplot as plt
 import warnings
-from nanolib.utils import customplot, printProgressBar
+from nanolib.utils import customplot, printprogressbar
 
 
 class TuneSVM:
@@ -307,7 +307,7 @@ class anneal:
 
         for i in range(self.niter):
             if self.verbose == 1:
-                printProgressBar(i + 1, self.niter, prefix=prefix + ":", suffix='Complete', length=50)
+                printprogressbar(i + 1, self.niter, prefix=prefix + ":", suffix='Complete', length=50)
 
             new = self.SAstep(curr, nvar, self.k, self.sizeDev, self.limit, self.seed)
             newQ = self.activation(new)
@@ -466,7 +466,7 @@ class genetic:
         population = self.initilize()
         for i in range(self.ngen):
             if self.verbose == 1:
-                printProgressBar(i + 1, self.ngen, prefix=f'GEN {i + 1} of {self.ngen}: ', suffix='Complete', length=50)
+                printprogressbar(i + 1, self.ngen, prefix=f'GEN {i + 1} of {self.ngen}: ', suffix='Complete', length=50)
             population = self.generate(population)
 
         print(f'Genetic Algorithm: {sum(self.bestchromosomes[-1])} '

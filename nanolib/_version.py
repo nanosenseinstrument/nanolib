@@ -11,7 +11,7 @@ Created on Tue Jul 14 18:23:51 2020
 @author: Shidiq Nur Hidayat
 """
 
-__version__ = '0.0.13'
+__version__ = '0.0.14'
 __author__ = 'Shidiq Nur Hidayat'
 __email__ = 's.hidayat@nanosense-id.com'
 __copyright__ = 'Copyright 2020, Nanosense-id.com'
