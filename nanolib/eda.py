@@ -239,6 +239,7 @@ class Stats:
         minDF = pd.DataFrame()
         maxDF = pd.DataFrame()
         meanDF = pd.DataFrame()
+        stdDF = pd.DataFrame()
 
         for i, item in enumerate(label):
             ind = self.df[self.key].isin([item])
@@ -260,11 +261,18 @@ class Stats:
             temp = pd.DataFrame(data=temp, columns=[item]).transpose()
             meanDF = meanDF.append(temp)
 
+            temp = self.df[ind]
+            temp = temp[nama]
+            temp = temp.apply(np.std, axis=0)
+            temp = pd.DataFrame(data=temp, columns=[item]).transpose()
+            stdDF = stdDF.append(temp)
+
         minDF = minDF.transpose()
         maxDF = maxDF.transpose()
         meanDF = meanDF.transpose()
+        stdDF = stdDF.transpose()
 
-        return minDF, meanDF, maxDF
+        return minDF, meanDF, maxDF, stdDF
 
     def saveinfo(self, file='info.txt'):
         import io
