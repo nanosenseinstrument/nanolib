@@ -16,6 +16,9 @@ import numpy as np
 import itertools
 import matplotlib.pyplot as plt
 import os
+import pandas as pd
+import math
+from sklearn.metrics import confusion_matrix
 
 
 # noinspection PyDefaultArgument
@@ -372,3 +375,41 @@ def Logging(logPath, fileName):
     rootLogger.addHandler(consoleHandler)
 
     return rootLogger
+
+
+def cmetrics(real_values, pred_values, beta=0.4):
+    CM = confusion_matrix(real_values, pred_values)
+    TN = CM[0][0]
+    FN = CM[1][0]
+    TP = CM[1][1]
+    FP = CM[0][1]
+    Population = TN + FN + TP + FP
+    Prevalence = round((TP + FP) / Population, 2)
+    Accuracy = round((TP + TN) / Population, 4)
+    Precision = round(TP / (TP + FP), 4)
+    NPV = round(TN / (TN + FN), 4)
+    FDR = round(FP / (TP + FP), 4)
+    FOR = round(FN / (TN + FN), 4)
+    check_Pos = Precision + FDR
+    check_Neg = NPV + FOR
+    Recall = round(TP / (TP + FN), 4)
+    FPR = round(FP / (TN + FP), 4)
+    FNR = round(FN / (TP + FN), 4)
+    TNR = round(TN / (TN + FP), 4)
+    check_Pos2 = Recall + FNR
+    check_Neg2 = FPR + TNR
+    LRPos = round(Recall / FPR, 4)
+    LRNeg = round(FNR / TNR, 4)
+    DOR = round(LRPos / LRNeg)
+    F1 = round(2 * ((Precision * Recall) / (Precision + Recall)), 4)
+    FBeta = round((1 + beta ** 2) * ((Precision * Recall) / ((beta ** 2 * Precision) + Recall)), 4)
+    MCC = round(((TP * TN) - (FP * FN)) / math.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)), 4)
+    BM = Recall + TNR - 1
+    MK = Precision + NPV - 1
+    mat_met = pd.DataFrame({
+        'Metric': ['TP', 'TN', 'FP', 'FN', 'Prevalence', 'Accuracy', 'Precision', 'NPV', 'FDR', 'FOR', 'check_Pos',
+                   'check_Neg', 'Recall', 'FPR', 'FNR', 'TNR', 'check_Pos2', 'check_Neg2', 'LR+', 'LR-', 'DOR', 'F1',
+                   'FBeta', 'MCC', 'BM', 'MK'],
+        'Value': [TP, TN, FP, FN, Prevalence, Accuracy, Precision, NPV, FDR, FOR, check_Pos, check_Neg, Recall, FPR,
+                  FNR, TNR, check_Pos2, check_Neg2, LRPos, LRNeg, DOR, F1, FBeta, MCC, BM, MK]})
+    return mat_met
