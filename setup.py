@@ -14,6 +14,5 @@ setup(name='nanolib',
       author_email='s.hidayat@nanosense-id.com',
       license='MIT',
       packages=['nanolib'],
-      install_requires=['scikit-learn', 'numpy', 'seaborn', 'matplotlib', 'sklearn-genetic', 'pycm', 'pandas',
-                        'tensorflow'],
+      install_requires=['scikit-learn', 'numpy', 'seaborn', 'matplotlib', 'sklearn-genetic', 'pycm', 'pandas'],
       zip_safe=False)
