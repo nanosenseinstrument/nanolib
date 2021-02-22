@@ -21,6 +21,38 @@ import math
 from sklearn.metrics import confusion_matrix
 
 
+def papers(legend_size=22, loc='best', classic=True):
+    if classic:
+        plt.style.use('classic')
+    params = {
+        "axes.formatter.useoffset": False,
+        "font.family": "sans-serif",
+        "font.sans-serif": "Arial",
+        "xtick.labelsize": 28,
+        "ytick.labelsize": 28,
+        "axes.labelsize": 28,
+        "axes.labelweight": "bold",
+        "figure.dpi": 100,
+        "figure.figsize": [10.72, 8.205],
+        "legend.loc": loc,
+        "legend.fontsize": legend_size,
+        "legend.fancybox": True,
+        "mathtext.fontset": 'custom',
+        "mathtext.default": 'regular',
+        "figure.autolayout": True,
+        "patch.edgecolor": "#000000",
+        "text.color": "#000000",
+        "axes.edgecolor": "#000000",
+        "axes.labelcolor": "#000000",
+        "xtick.color": "#000000",
+        "ytick.color": "#000000",
+    }
+    matplotlib.rcParams.update(params)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    return fig, ax
+
+
 # noinspection PyDefaultArgument
 def customplot(adj_left=.13, adj_bottom=.13, figsize=[10.72, 8.205], axes_size=31, tick_size=24, legend_size=24,
                co=False):
@@ -75,7 +107,7 @@ def plotroc(y_test, y_score, lw=3, colors=None, multiclass=True):
         colors = ['aqua', 'darkorange', 'cornflowerblue']
 
     from sklearn.metrics import roc_curve, auc
-    from scipy import interp
+    from numpy import interp
 
     if multiclass:
         n_classes = y_test.shape[1]
@@ -245,6 +277,7 @@ def ClassificationReport(ytrue, ypred, plotcm=False, file=None, **options):
     b = options.get('adj_bottom', 0.2)
     figsize = options.get('figsize', [4, 4])
     axes_size = options.get('axes_size', 22)
+    # noinspection PyUnresolvedReferences
     cmap = options.get('cmap', plt.cm.RdPu)
     fontsize = options.get('fontsize', 26)
     xrot = options.get('xrot', 0)
@@ -282,12 +315,11 @@ def ClassificationReport(ytrue, ypred, plotcm=False, file=None, **options):
 
 # noinspection PyPep8Naming
 def FullClassificationReport(model, xtrain, xtest, ytrain, ytest, bypass=False, scoring=None, **options):
-    import pandas as pd
-
     a = options.get('adj_left', 0.1)
     b = options.get('adj_bottom', 0.2)
     figsize = options.get('figsize', [4, 4])
     axes_size = options.get('axes_size', 22)
+    # noinspection PyUnresolvedReferences
     cmap = options.get('cmap', plt.cm.RdPu)
     fontsize = options.get('fontsize', 26)
     xrot = options.get('xrot', 0)
