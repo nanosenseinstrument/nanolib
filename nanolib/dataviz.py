@@ -100,6 +100,7 @@ class CalcPCA:
         PC = options.get('PC', ['PC1', 'PC2'])
         a = options.get('adj_left', 0.1)
         b = options.get('adj_bottom', 0.15)
+        s = options.get('size', 90)
         ascending = options.get('ascending', True)
         self.pcadf = self.pcadf.sort_values(by=['label'], ascending=ascending)
 
@@ -123,7 +124,7 @@ class CalcPCA:
                        self.pcadf.loc[indicesToKeep, PC[1]],
                        c=color,
                        marker=mark,
-                       s=50,
+                       s=s,
                        )
 
         plt.xlabel(xlabs)

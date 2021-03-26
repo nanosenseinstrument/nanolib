@@ -21,7 +21,7 @@ import math
 from sklearn.metrics import confusion_matrix
 
 
-def papers(legend_size=22, loc='best', classic=True):
+def papers(legend_size=22, loc='best', classic=True, pad=None):
     if classic:
         plt.style.use('classic')
     params = {
