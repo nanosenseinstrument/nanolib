@@ -7,7 +7,7 @@ Quick Data Analysis for Phython
 
 
 
-> pip install git+https://github.com/Shidiq/nanolib.git
+> pip install git+https://github.com/nanosenseinstrument/nanolib.git
 
 > E-mail: s.hidayat@nanosense-id.com, shidiq.hidayat@gmail.com
 
